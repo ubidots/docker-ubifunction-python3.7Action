@@ -29,10 +29,9 @@ q = queue.Queue()
 def worker():
   while True:
     __report_url, __action_id, execution_time, timestamp = q.get()
-    requests.post("https://parse.ubidots.com/prv/dsr/return-args?_blocking=false",
-              json={'timestamp': timestamp, 'execution-time': execution_time,
-                    'id': __action_id
-              })
+    requests.post(__report_url, json={'timestamp': timestamp, 'execution-time': execution_time,
+                                      'id': __action_id
+                                     })
     q.task_done()
 
 t = Thread(target=worker)
