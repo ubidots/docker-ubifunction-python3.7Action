@@ -38,5 +38,5 @@ pymongo==3.9.0
 redis==3.3.8
 pika==1.1.0
 elasticsearch==7.0.4
-cassandra-driver == 3.18.0
+cassandra-driver==3.19.0
 etcd3 == 0.10.0
