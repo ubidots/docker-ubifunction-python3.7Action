@@ -22,6 +22,7 @@ scrapy == 1.6.0
 simplejson == 3.16.0
 virtualenv == 16.7.1
 twisted == 19.7.0
+paho-mqtt == 1.4.0
 
 **packages for numerics**
 numpy == 1.16.4
