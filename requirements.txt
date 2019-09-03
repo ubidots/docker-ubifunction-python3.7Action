@@ -36,7 +36,7 @@ ibmcloudsql==0.3.4
 psycopg2==2.8.3
 pymongo==3.9.0
 redis==3.3.8
-pika == 1.0.1
+pika==1.1.0
 elasticsearch == 6.3.1
 cassandra-driver == 3.18.0
 etcd3 == 0.10.0
