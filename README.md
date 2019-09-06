@@ -80,4 +80,6 @@ ibmcloud wsk action invoke helloPython
 #### How to use as a docker Action locally
 To use as a docker action based on this container
 
-bx wsk action update helloPython hello.py --docker ubidots/docker-ubifunction-python3action
+```
+ibmcloud wsk action update helloPython hello.py --docker ubidots/docker-ubifunction-python3action
+```
