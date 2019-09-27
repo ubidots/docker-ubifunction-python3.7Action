@@ -26,10 +26,11 @@ import subprocess
 
 
 def copy(src, dst):
-    with codecs.open(src, 'r', 'utf-8') as s:
+    with codecs.open(src, "r", "utf-8") as s:
         body = s.read()
-        with codecs.open(dst, 'w', 'utf-8') as d:
+        with codecs.open(dst, "w", "utf-8") as d:
             d.write(body)
+
 
 # if there is an exec copy to main__.py
 # else if there is a __main__.py copy to main__.py
@@ -41,7 +42,7 @@ def sources(launcher, source_dir, main):
     dst = "%s/main__.py" % source_dir
     # copy exec to main__.py
     if os.path.isfile(src):
-        copy(src,dst)
+        copy(src, dst)
     else:
         # renaming __main__ to main__
         src = "%s/__main__.py" % source_dir
@@ -50,13 +51,16 @@ def sources(launcher, source_dir, main):
 
     # copy a launcher
     starter = "%s/exec__.py" % source_dir
-    with codecs.open(launcher, 'r', 'utf-8') as s:
-        with codecs.open(starter, 'w', 'utf-8') as d:
+    with codecs.open(launcher, "r", "utf-8") as s:
+        with codecs.open(starter, "w", "utf-8") as d:
             body = s.read()
-            body = body.replace("from main__ import main as main",
-                                "from main__ import %s as main" % main)
+            body = body.replace(
+                "from main__ import main as main",
+                "from main__ import %s as main" % main,
+            )
             d.write(body)
     return starter
+
 
 # build the launcher but only if there is the main
 def build(source_dir, target_file, launcher):
@@ -66,14 +70,18 @@ def build(source_dir, target_file, launcher):
         cmd += """
 cd %s
 exec "$(which python)" %s "$@"
-""" % (source_dir, launcher)
+""" % (
+            source_dir,
+            launcher,
+        )
     else:
         cmd += """
 echo "Zip file does not include mandatory files."
 """
-    with codecs.open(target_file, 'w', 'utf-8') as d:
+    with codecs.open(target_file, "w", "utf-8") as d:
         d.write(cmd)
     os.chmod(target_file, 0o755)
+
 
 def compile(argv):
     if len(argv) < 4:
@@ -83,7 +91,7 @@ def compile(argv):
     main = argv[1]
     source_dir = os.path.abspath(argv[2])
     target_file = os.path.abspath("%s/exec" % argv[3])
-    launcher = os.path.abspath(argv[0]+".launcher.py")
+    launcher = os.path.abspath(argv[0] + ".launcher.py")
     starter = sources(launcher, source_dir, main)
     build(source_dir, target_file, starter)
     sys.stdout.flush()
@@ -91,15 +99,15 @@ def compile(argv):
     return target_file
 
 
-if __name__ == '__main__':
-    p = subprocess.Popen([compile(sys.argv), "exit"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+if __name__ == "__main__":
+    p = subprocess.Popen(
+        [compile(sys.argv), "exit"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     (o, e) = p.communicate()
     if isinstance(o, bytes) and not isinstance(o, str):
-        o = o.decode('utf-8')
+        o = o.decode("utf-8")
     if isinstance(e, bytes) and not isinstance(e, str):
-        e = e.decode('utf-8')
+        e = e.decode("utf-8")
     if o:
         sys.stdout.write(o)
         sys.stdout.flush()

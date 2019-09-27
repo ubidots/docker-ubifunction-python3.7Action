@@ -15,95 +15,126 @@
 # limitations under the License.
 #
 from __future__ import print_function
+from main__ import main as main
 from sys import stdin
 from sys import stdout
 from sys import stderr
 from os import fdopen
-import sys, os, json, traceback, warnings, requests, random, requests, time, datetime
+import sys
+import os
+import json
+import traceback
+import warnings
+import requests
+import random
+import requests
+import time
+import datetime
 
 from threading import Thread
+from raven import Client
 import queue
 
 q = queue.Queue()
 
+
 def worker():
-  while True:
-    __report_url, __action_id, execution_time, timestamp = q.get()
-    requests.post(__report_url, json={'timestamp': timestamp, 'execution-time': execution_time,
-                                      'id': __action_id
-                                     })
-    q.task_done()
+    while True:
+        __report_url, __sentry_url, __action_id, execution_time, timestamp = q.get()
+        try:
+            requests.post(
+                __report_url,
+                json={
+                    "timestamp": timestamp,
+                    "execution-time": execution_time,
+                    "id": __action_id,
+                },
+            )
+        except Exception as e:
+            client = Client(__sentry_url)
+            client.captureMessage("*UbiFunction Container Node:* \n{}".format(e))
+        finally:
+            q.task_done()
+
 
 t = Thread(target=worker)
 t.daemon = True
 t.start()
 
 try:
-  # if the directory 'virtualenv' is extracted out of a zip file
-  path_to_virtualenv = os.path.abspath('./virtualenv')
-  if os.path.isdir(path_to_virtualenv):
-    # activate the virtualenv using activate_this.py contained in the virtualenv
-    activate_this_file = path_to_virtualenv + '/bin/activate_this.py'
-    if os.path.exists(activate_this_file):
-      with open(activate_this_file) as f:
-        code = compile(f.read(), activate_this_file, 'exec')
-        exec(code, dict(__file__=activate_this_file))
-    else:
-      sys.stderr.write('Invalid virtualenv. Zip file does not include /virtualenv/bin/' + os.path.basename(activate_this_file) + '\n')
-      sys.exit(1)
+    # if the directory 'virtualenv' is extracted out of a zip file
+    path_to_virtualenv = os.path.abspath("./virtualenv")
+    if os.path.isdir(path_to_virtualenv):
+        # activate the virtualenv using activate_this.py contained in the virtualenv
+        activate_this_file = path_to_virtualenv + "/bin/activate_this.py"
+        if os.path.exists(activate_this_file):
+            with open(activate_this_file) as f:
+                code = compile(f.read(), activate_this_file, "exec")
+                exec(code, dict(__file__=activate_this_file))
+        else:
+            sys.stderr.write(
+                "Invalid virtualenv. Zip file does not include /virtualenv/bin/"
+                + os.path.basename(activate_this_file)
+                + "\n"
+            )
+            sys.exit(1)
 except Exception:
-  traceback.print_exc(file=sys.stderr, limit=0)
-  sys.exit(1)
+    traceback.print_exc(file=sys.stderr, limit=0)
+    sys.exit(1)
 
 # now import the action as process input/output
 warnings.filterwarnings("ignore")
-from main__ import main as main
 warnings.resetwarnings()
 
 # if there are some arguments exit immediately
-if len(sys.argv) >1:
-  sys.stderr.flush()
-  sys.stdout.flush()
-  sys.exit(0)
+if len(sys.argv) > 1:
+    sys.stderr.flush()
+    sys.stdout.flush()
+    sys.exit(0)
 
 env = os.environ
 out = fdopen(3, "wb")
 
 while True:
-  line = stdin.readline()
-  if not line: break
-  args = json.loads(line)
-  payload = {}
-  for key in args:
-    if key == "value":
-      payload = args["value"]
-    else:
-      env["__OW_%s" % key.upper()]= args[key]
-  res = {}
-  try:
-    __action_id = os.getenv('__OW_ACTION_NAME', None).split('adapter-')[-1]
-    __report_url = payload.get('reportUrl', None)
+    line = stdin.readline()
+    if not line:
+        break
+    args = json.loads(line)
+    payload = {}
+    for key in args:
+        if key == "value":
+            payload = args["value"]
+        else:
+            env["__OW_%s" % key.upper()] = args[key]
+    res = {}
+    try:
+        __action_id = os.getenv("__OW_ACTION_NAME", None).split("adapter-")[-1]
+        __report_url = payload.get("reportUrl", None)
+        __sentry_url = payload.get("sentryUrl", None)
 
-    if __report_url is not None:
-      payload.pop('reportUrl')
+        if __report_url is not None:
+            payload.pop("reportUrl")
 
-    if __action_id is not None:
-      payload.pop('actionId')
+        if __sentry_url is not None:
+            payload.pop("sentryUrl")
 
-    init_time = time.time()
-    res = main(payload)
-  except Exception as ex:
-    print(traceback.format_exc(), file=stderr)
-    res = {"error": str(ex)}
+        if __action_id is not None:
+            payload.pop("actionId")
 
-  execution_time = time.time() - init_time
-  out.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
-  out.write(b'\n')
+        init_time = time.time()
+        res = main(payload)
+    except Exception as ex:
+        print(traceback.format_exc(), file=stderr)
+        res = {"error": str(ex)}
 
-  # Reporter: Action name expected '/Ubidots_parsers/adapter-id'
-  timestamp = int(datetime.datetime.utcnow().timestamp() * 1000)
-  q.put((__report_url, __action_id, execution_time, timestamp))
+    execution_time = time.time() - init_time
+    out.write(json.dumps(res, ensure_ascii=False).encode("utf-8"))
+    out.write(b"\n")
 
-  stdout.flush()
-  stderr.flush()
-  out.flush()
+    # Reporter: Action name expected '/Ubidots_parsers/adapter-id'
+    timestamp = int(datetime.datetime.utcnow().timestamp() * 1000)
+    q.put((__report_url, __sentry_url,__action_id, execution_time, timestamp))
+
+    stdout.flush()
+    stderr.flush()
+    out.flush()
