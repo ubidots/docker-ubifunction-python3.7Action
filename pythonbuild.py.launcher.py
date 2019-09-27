@@ -30,6 +30,7 @@ import random
 import requests
 import time
 import datetime
+import math
 
 from threading import Thread
 import sentry_sdk
@@ -124,7 +125,7 @@ while True:
         print(traceback.format_exc(), file=stderr)
         res = {"error": str(ex)}
 
-    execution_time = (time.time() - init_time) * 1000
+    execution_time = math.ceil((time.time() - init_time) * 1000)
     out.write(json.dumps(res, ensure_ascii=False).encode("utf-8"))
     out.write(b"\n")
 
