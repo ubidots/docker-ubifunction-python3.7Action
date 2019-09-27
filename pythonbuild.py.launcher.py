@@ -118,9 +118,6 @@ while True:
         if __sentry_url is not None:
             payload.pop("sentryUrl")
 
-        if __action_id is not None:
-            payload.pop("actionId")
-
         init_time = time.time()
         res = main(payload)
     except Exception as ex:
@@ -133,7 +130,7 @@ while True:
 
     # Reporter: Action name expected '/Ubidots_parsers/adapter-id'
     timestamp = int(datetime.datetime.utcnow().timestamp() * 1000)
-    q.put((__report_url, __sentry_url,__action_id, execution_time, timestamp))
+    q.put((__report_url, __sentry_url, __action_id, execution_time, timestamp))
 
     stdout.flush()
     stderr.flush()
