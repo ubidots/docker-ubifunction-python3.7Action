@@ -124,7 +124,7 @@ while True:
         print(traceback.format_exc(), file=stderr)
         res = {"error": str(ex)}
 
-    execution_time = time.time() - init_time
+    execution_time = (time.time() - init_time) * 1000
     out.write(json.dumps(res, ensure_ascii=False).encode("utf-8"))
     out.write(b"\n")
 
