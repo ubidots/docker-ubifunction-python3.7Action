@@ -133,7 +133,7 @@ while True:
 
     # Reporter: Action name expected '/Ubidots_parsers/adapter-id'
     timestamp = int(datetime.datetime.utcnow().timestamp() * 1000)
-    q.put((__report_url, __action_id, execution_time, timestamp))
+    q.put((__report_url, __sentry_url,__action_id, execution_time, timestamp))
 
     stdout.flush()
     stderr.flush()
