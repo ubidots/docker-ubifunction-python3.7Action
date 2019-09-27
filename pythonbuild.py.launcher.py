@@ -116,7 +116,7 @@ while True:
             payload.pop("reportUrl")
 
         if __sentry_url is not None:
-            payload.pop("reportUrl")
+            payload.pop("sentryUrl")
 
         if __action_id is not None:
             payload.pop("actionId")
