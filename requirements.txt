@@ -41,3 +41,6 @@ pika == 1.0.1
 elasticsearch == 6.3.1
 cassandra-driver == 3.18.0
 etcd3 == 0.10.0
+
+# Notification Packages
+sentry-sdk==0.12.2
