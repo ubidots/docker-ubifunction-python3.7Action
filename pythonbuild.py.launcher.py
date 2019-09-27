@@ -32,7 +32,7 @@ import time
 import datetime
 
 from threading import Thread
-from raven import Client
+import sentry_sdk
 import queue
 
 q = queue.Queue()
@@ -51,8 +51,8 @@ def worker():
                 },
             )
         except Exception as e:
-            client = Client(__sentry_url)
-            client.captureMessage("*UbiFunction Container Node:* \n{}".format(e))
+            sentry_sdk.init(dsn=__sentry_url)
+            sentry_sdk.captureMessage("*UbiFunction Container Node:* \n{}".format(e))
         finally:
             q.task_done()
 
