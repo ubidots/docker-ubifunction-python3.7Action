@@ -115,10 +115,10 @@ while True:
         __sentry_url = payload.get("sentryUrl", None)
 
         if __report_url is not None:
-            payload.pop("reportUrl")
+            payload.pop("reportUrl", None)
 
         if __sentry_url is not None:
-            payload.pop("sentryUrl")
+            payload.pop("sentryUrl", None)
 
         init_time = time.time()
         res = main(payload)
