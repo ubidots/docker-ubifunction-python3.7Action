@@ -99,6 +99,7 @@ out = fdopen(3, "wb")
 while True:
     line = stdin.readline()
     if not line:
+        q.join()
         break
     args = json.loads(line)
     payload = {}
@@ -125,13 +126,13 @@ while True:
         print(traceback.format_exc(), file=stderr)
         res = {"error": str(ex)}
 
-    execution_time = math.ceil((time.time() - init_time) * 1000)
-    out.write(json.dumps(res, ensure_ascii=False).encode("utf-8"))
-    out.write(b"\n")
-
     # Reporter: Action name expected '/Ubidots_parsers/adapter-id'
+    execution_time = math.ceil((time.time() - init_time) * 1000)
     timestamp = int(datetime.datetime.utcnow().timestamp() * 1000)
     q.put((__report_url, __sentry_url, __action_id, execution_time, timestamp))
+
+    out.write(json.dumps(res, ensure_ascii=False).encode("utf-8"))
+    out.write(b"\n")
 
     stdout.flush()
     stderr.flush()
