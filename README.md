@@ -1,4 +1,4 @@
-# Docker-UbiFunction-python3Action
+# Docker-UbiFunction-python3.7Action
 Base Docker to execute UbiFunction python actions. Based on the original IBM Openwhisk action runner: https://github.com/ibm-functions/runtime-python.
 
 The runtime is based on python3.7, older versions are not supported.
