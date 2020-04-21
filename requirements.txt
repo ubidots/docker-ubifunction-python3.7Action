@@ -48,3 +48,6 @@ sentry-sdk==0.12.2
 # AWS specific modules
 boto3==1.10.29
 botocore==1.13.29
+
+# crypto packages
+cryptography==2.9.1
