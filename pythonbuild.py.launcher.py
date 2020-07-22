@@ -39,6 +39,13 @@ import queue
 q = queue.Queue()
 
 
+def parse_to_json(value):
+    try:
+        return json.loads(value)
+    except (SyntaxError, json.JSONDecodeError):
+        return {}
+
+
 def worker():
     while True:
         __report_url, __sentry_url, __action_id, execution_time, timestamp = q.get()
@@ -114,12 +121,25 @@ while True:
         __action_id = os.getenv("__OW_ACTION_NAME", None).split("adapter-")[-1]
         __report_url = payload.get("reportUrl", None)
         __sentry_url = payload.get("sentryUrl", None)
+        __environment = payload.get("_environment", None)
+        __parameters = payload.get("_parameters", None)
 
         if __report_url is not None:
             payload.pop("reportUrl", None)
 
         if __sentry_url is not None:
             payload.pop("sentryUrl", None)
+
+        if __environment is not None:
+            parsed_data = parse_to_json(__environment)
+            os.environ["__OW_ENVIRONMENT"] = json.dumps(parsed_data)
+            payload.pop("_environment", None)
+
+        if __parameters is not None:
+            parsed_data = parse_to_json(__parameters)
+            payload.pop("_parameters", None)
+            parsed_data.update(payload)
+            payload = parsed_data
 
         init_time = time.time()
         res = main(payload)
