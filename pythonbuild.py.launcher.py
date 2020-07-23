@@ -40,9 +40,11 @@ q = queue.Queue()
 
 
 def parse_to_json(value):
+    if isinstance(value, dict):
+        return value
     try:
         return json.loads(value)
-    except (SyntaxError, json.JSONDecodeError):
+    except (SyntaxError, json.JSONDecodeError, TypeError):
         return {}
 
 
@@ -114,32 +116,34 @@ while True:
     for key in args:
         if key == "value":
             payload = args["value"]
-        else:
+        elif key.upper() in ["TRANSACTION_ID", "ACTIVATION_ID", "ACTION_NAME"]:
             env["__OW_%s" % key.upper()] = args[key]
+
     res = {}
     try:
-        __action_id = os.getenv("__OW_ACTION_NAME", None).split("adapter-")[-1]
-        __report_url = payload.get("reportUrl", None)
-        __sentry_url = payload.get("sentryUrl", None)
-        __environment = payload.get("_environment", None)
-        __parameters = payload.get("_parameters", None)
+        __action_id = os.getenv("__OW_ACTION_NAME", "").split("adapter-")[-1]
+        __report_url = payload.pop("reportUrl", None)
+        __sentry_url = payload.pop("sentryUrl", None)
+        __environment = payload.pop("_environment", None)
+        __auth_credentials = payload.pop("auth_credentials", {})
+        __parameters = payload.pop("_parameters", None)
 
-        if __report_url is not None:
-            payload.pop("reportUrl", None)
+        payload.pop("reportUrl", None)
+        payload.pop("sentryUrl", None)
 
-        if __sentry_url is not None:
-            payload.pop("sentryUrl", None)
+        # Parse environment data and create each key as an environment variable
+        parsed_data = parse_to_json(__environment)
+        for key, value in parsed_data.items():
+            env["__{key}".format(key=key)] = value
 
-        if __environment is not None:
-            parsed_data = parse_to_json(__environment)
-            os.environ["__OW_ENVIRONMENT"] = json.dumps(parsed_data)
-            payload.pop("_environment", None)
+        # Create each key on auth_credentials as an environment variable
+        for key, value in __auth_credentials.items():
+            env["AUTH_CREDENTIALS_{key}".format(key=key.upper())] = value
 
-        if __parameters is not None:
-            parsed_data = parse_to_json(__parameters)
-            payload.pop("_parameters", None)
-            parsed_data.update(payload)
-            payload = parsed_data
+        # Parse _parameters data and sent to script as an extra key inside args
+        parsed_data = parse_to_json(__parameters)
+        if parsed_data:
+            payload.update({"parameters": parsed_data})
 
         init_time = time.time()
         res = main(payload)
