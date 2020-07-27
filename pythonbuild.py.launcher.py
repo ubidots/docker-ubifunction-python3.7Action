@@ -125,7 +125,7 @@ while True:
         __report_url = payload.pop("reportUrl", None)
         __sentry_url = payload.pop("sentryUrl", None)
         __environment = payload.pop("_environment", None)
-        __auth_credentials = payload.pop("auth_credentials", {})
+        __auth_credentials = payload.pop("_auth_credentials", {})
         __parameters = payload.pop("_parameters", None)
 
         payload.pop("reportUrl", None)
