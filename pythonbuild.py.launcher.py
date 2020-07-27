@@ -128,9 +128,6 @@ while True:
         __auth_credentials = payload.pop("_auth_credentials", {})
         __parameters = payload.pop("_parameters", None)
 
-        payload.pop("reportUrl", None)
-        payload.pop("sentryUrl", None)
-
         # Parse environment data and create each key as an environment variable
         parsed_data = parse_to_json(__environment)
         for key, value in parsed_data.items():
