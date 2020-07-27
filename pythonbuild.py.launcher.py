@@ -125,11 +125,8 @@ while True:
         __report_url = payload.pop("reportUrl", None)
         __sentry_url = payload.pop("sentryUrl", None)
         __environment = payload.pop("_environment", None)
-        __auth_credentials = payload.pop("auth_credentials", {})
+        __auth_credentials = payload.pop("_auth_credentials", {})
         __parameters = payload.pop("_parameters", None)
-
-        payload.pop("reportUrl", None)
-        payload.pop("sentryUrl", None)
 
         # Parse environment data and create each key as an environment variable
         parsed_data = parse_to_json(__environment)
@@ -137,7 +134,8 @@ while True:
             env["__{key}".format(key=key)] = value
 
         # Create each key on auth_credentials as an environment variable
-        for key, value in __auth_credentials.items():
+        parse_data = parse_to_json(__auth_credentials)
+        for key, value in parse_data.items():
             env["AUTH_CREDENTIALS_{key}".format(key=key.upper())] = value
 
         # Parse _parameters data and sent to script as an extra key inside args
