@@ -32,6 +32,7 @@ Default Python packages supported by the container
 
 **packages for image processing**
 - Pillow == 6.0.0
+- opencv-python==4.2.0.34
 
 **IBM specific python modules**
 - ibm_db == 3.0.1
