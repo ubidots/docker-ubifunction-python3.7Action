@@ -63,7 +63,9 @@ def worker():
         except Exception as e:
             if __sentry_url is not None:
                 sentry_sdk.init(dsn=__sentry_url)
-                sentry_sdk.captureMessage("*UbiFunction Container Node:* \n{}".format(e))
+                sentry_sdk.captureMessage(
+                    "*UbiFunction Container Node:* \n{}".format(e)
+                )
         finally:
             q.task_done()
 
@@ -141,7 +143,7 @@ while True:
         # Parse _parameters data and sent to script as an extra key inside args
         parsed_data = parse_to_json(__parameters)
         if parsed_data:
-            payload.update({"parameters": parsed_data})
+            payload.update({"_parameters": parsed_data})
 
         init_time = time.time()
         res = main(payload)
