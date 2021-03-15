@@ -123,6 +123,8 @@ while True:
 
     res = {}
     try:
+        if payload.get("_ping") == "true":
+            raise RuntimeError("Ping function")
         __action_id = os.getenv("__OW_ACTION_NAME", "").split("adapter-")[-1]
         __report_url = payload.pop("reportUrl", None)
         __sentry_url = payload.pop("sentryUrl", None)
@@ -136,8 +138,8 @@ while True:
             env["__{key}".format(key=key)] = value
 
         # Create each key on auth_credentials as an environment variable
-        parse_data = parse_to_json(__auth_credentials)
-        for key, value in parse_data.items():
+        parsed_data = parse_to_json(__auth_credentials)
+        for key, value in parsed_data.items():
             env["AUTH_CREDENTIALS_{key}".format(key=key.upper())] = value
 
         # Parse _parameters data and sent to script as an extra key inside args
@@ -147,6 +149,8 @@ while True:
 
         init_time = time.time()
         res = main(payload)
+    except RuntimeError:
+        res = {"result": "pong"}
     except Exception as ex:
         print(traceback.format_exc(), file=stderr)
         res = {"error": str(ex)}
