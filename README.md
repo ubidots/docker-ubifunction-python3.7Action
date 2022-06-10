@@ -27,6 +27,7 @@ Default Python packages supported by the container
 - pynt==0.8.2
 - pytz == 2020.5
 - Js2Py == 0.71
+- ubidots == 0.0.1
 
 ### packages for numerics
 

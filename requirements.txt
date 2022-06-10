@@ -17,6 +17,7 @@ paho-mqtt == 1.5.1
 pynt==0.8.2
 pytz
 Js2Py == 0.71
+git+https://github.com/ubidots/ubidots-python.git@7ab3392#egg=ubidots
 
 # packages for numerics
 numpy == 1.19.5
